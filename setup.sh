@@ -9,6 +9,12 @@ rm -rf output/
 rm -rf temp_demucs/
 mkdir -p output
 
+# Verifica se a pasta output existe no diretório raiz, caso contrário, cria
+if [ ! -d "/output" ]; then
+    echo "Criando pasta /output no diretório raiz..."
+    sudo mkdir -p /output
+fi
+
 # Verifica se Python está instalado
 if ! command -v python3 &> /dev/null
 then
