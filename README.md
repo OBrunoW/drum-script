@@ -42,4 +42,12 @@ project/
 ```
 ---
 
+### **Referências**
+
+- [LilyPond](http://lilypond.org/)
+- [Demucs](https://github.com/facebookresearch/demucs)
+- [YouTube Data API](https://developers.google.com/youtube/v3)
+
+---
+
 👤 **Desenvolvido por Or1on**  
