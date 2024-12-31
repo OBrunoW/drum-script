@@ -3,17 +3,13 @@
 # Mensagem inicial
 echo "Inicializando configuração do ambiente..."
 
-# Limpar saídas anteriores
-echo "Limpando saídas anteriores..."
-rm -rf output/
+# Limpar saídas temporárias
+echo "Limpando arquivos temporários..."
 rm -rf temp_demucs/
-mkdir -p output
+rm -rf temp_downloads/
 
-# Verifica se a pasta output existe no diretório raiz, caso contrário, cria
-if [ ! -d "/output" ]; then
-    echo "Criando pasta /output no diretório raiz..."
-    sudo mkdir -p /output
-fi
+# Garantir que a pasta de saída existe
+mkdir -p output
 
 # Verifica se Python está instalado
 if ! command -v python3 &> /dev/null
@@ -22,10 +18,20 @@ then
     exit 1
 fi
 
-# Instala dependências via pip
+# Criação de um ambiente virtual
+echo "Criando ambiente virtual Python..."
+python3 -m venv venv
+
+# Ativar o ambiente virtual
+source venv/bin/activate
+
+# Atualizar o pip no ambiente virtual
+echo "Atualizando o pip no ambiente virtual..."
+pip install --upgrade pip
+
+# Instalar dependências
 echo "Instalando dependências Python..."
-pip3 install --upgrade pip
-pip3 install yt-dlp pydub demucs diffq librosa numpy
+pip install yt-dlp pydub demucs diffq librosa numpy
 
 # Verifica instalação do ffmpeg
 if ! command -v ffmpeg &> /dev/null
@@ -55,17 +61,14 @@ then
     fi
 fi
 
-# Verifica instalação do LilyPond
-if ! command -v lilypond &> /dev/null
-then
-    echo "LilyPond não encontrado. Certifique-se de instalá-lo antes de continuar."
-    echo "Para instalar LilyPond, visite: https://lilypond.org"
-    exit 1
-fi
-
 # Configura o PYTHONPATH para incluir a pasta raiz do projeto
 export PYTHONPATH=$(pwd)
 
 # Executa o programa principal
 echo "Iniciando o programa principal..."
 python3 src/main.py
+
+# Desativar o ambiente virtual após a execução
+deactivate
+
+echo "Processo concluído! Os arquivos de saída estão na pasta 'output/'."

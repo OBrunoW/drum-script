@@ -1,47 +1,55 @@
+import os
+import shutil
 from src.download_mp3 import download_mp3
 from src.select_instrument import isolate_drums
-from src.spectrogram import process_audio
-from src.classify_events import classify_events
-from src.generate_lilypond import generate_lilypond
-import os
 
 def main():
-    # Caminho para o áudio final do Demucs
-    drum_audio = "temp_demucs/mdx_extra_q/drum_song/drums.wav"
+    while True:
+        # Diretórios de trabalho
+        temp_dir = "temp_downloads"
+        demucs_temp_dir = "temp_demucs"
+        output_dir = "output"
+        os.makedirs(temp_dir, exist_ok=True)
+        os.makedirs(output_dir, exist_ok=True)
 
-    # Passo 1: Baixar música do YouTube
-    link = input("Digite o link do YouTube da música: ")
-    print("Baixando música...")
-    mp3_path = download_mp3(link)
-    if not mp3_path:
-        print("Erro ao baixar a música.")
-        return
+        # Solicitar link do usuário
+        link = input("Digite o link do YouTube da música (ou 'sair' para encerrar): ")
+        if link.lower() == "sair":
+            print("Encerrando...")
+            break
 
-    # Passo 2: Isolar a bateria
-    print("Isolando bateria...")
-    drums_path = isolate_drums(mp3_path)
-    if not drums_path:
-        print("Erro ao isolar a bateria.")
-        return
+        # Passo 1: Baixar música do YouTube
+        print("Baixando música...")
+        mp3_path = download_mp3(link, output_path=os.path.join(temp_dir, "input.mp3"))
+        if not mp3_path:
+            print("Erro ao baixar a música.")
+            continue
 
-    # Verifica se o arquivo isolado foi gerado
-    if not os.path.exists(drum_audio):
-        print(f"Erro: Arquivo de bateria não encontrado em '{drum_audio}'")
-        return
+        # Passo 2: Separar instrumentos com Demucs
+        print("Separando instrumentos com Demucs...")
+        no_drums_path = isolate_drums(mp3_path, temp_dir=demucs_temp_dir)
+        if not no_drums_path:
+            print("Erro ao processar a música.")
+            continue
 
-    # Passo 3: Processar o áudio
-    print("Processando áudio...")
-    _, onsets = process_audio(drum_audio)
+        # Verificar se o arquivo no_drums.mp3 foi gerado
+        if not os.path.exists(no_drums_path):
+            print("Erro: Arquivo 'no_drums.mp3' não encontrado.")
+            continue
 
-    # Passo 4: Classificar eventos
-    print("Classificando eventos...")
-    events = classify_events(drum_audio, onsets)
+        # Passo 3: Mover o arquivo para o diretório final
+        try:
+            shutil.move(no_drums_path, os.path.join(output_dir, "no_drums.mp3"))
+            print(f"Arquivo 'no_drums.mp3' salvo em '{output_dir}'")
+        except Exception as e:
+            print(f"Erro ao mover o arquivo processado: {e}")
 
-    # Passo 5: Gerar partitura em LilyPond
-    print("Gerando partitura...")
-    generate_lilypond(events)
+        # Passo 4: Limpeza de arquivos temporários
+        print("Limpando arquivos temporários...")
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        shutil.rmtree(demucs_temp_dir, ignore_errors=True)
 
-    print("Processo concluído! Verifique a saída na pasta 'output/'.")
+        print("Processo concluído! Aguardando próximo link...\n")
 
 if __name__ == "__main__":
     main()
