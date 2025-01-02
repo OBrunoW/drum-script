@@ -5,7 +5,6 @@ echo "Inicializando configuração do ambiente..."
 
 # Limpar saídas temporárias
 echo "Limpando arquivos temporários..."
-rm -rf temp_demucs/
 rm -rf temp_downloads/
 
 # Garantir que a pasta de saída existe

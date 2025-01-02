@@ -6,8 +6,7 @@ from src.select_instrument import isolate_drums
 def main():
     while True:
         # Diretórios de trabalho
-        temp_dir = "temp_downloads"
-        demucs_temp_dir = "temp_demucs"
+        temp_dir = "download_temp"
         output_dir = "output"
         os.makedirs(temp_dir, exist_ok=True)
         os.makedirs(output_dir, exist_ok=True)
@@ -27,27 +26,15 @@ def main():
 
         # Passo 2: Separar instrumentos com Demucs
         print("Separando instrumentos com Demucs...")
-        no_drums_path = isolate_drums(mp3_path, temp_dir=demucs_temp_dir)
+        no_drums_path = isolate_drums(mp3_path, temp_dir=temp_dir)
         if not no_drums_path:
             print("Erro ao processar a música.")
             continue
 
-        # Verificar se o arquivo no_drums.mp3 foi gerado
-        if not os.path.exists(no_drums_path):
-            print("Erro: Arquivo 'no_drums.mp3' não encontrado.")
-            continue
-
-        # Passo 3: Mover o arquivo para o diretório final
-        try:
-            shutil.move(no_drums_path, os.path.join(output_dir, "no_drums.mp3"))
-            print(f"Arquivo 'no_drums.mp3' salvo em '{output_dir}'")
-        except Exception as e:
-            print(f"Erro ao mover o arquivo processado: {e}")
-
-        # Passo 4: Limpeza de arquivos temporários
+        # Passo 3: Limpeza de arquivos temporários
         print("Limpando arquivos temporários...")
         shutil.rmtree(temp_dir, ignore_errors=True)
-        shutil.rmtree(demucs_temp_dir, ignore_errors=True)
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
         print("Processo concluído! Aguardando próximo link...\n")
 
